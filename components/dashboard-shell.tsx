@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   Bell,
   CalendarDays,
@@ -12,6 +12,7 @@ import {
   HeartPulse,
   LayoutDashboard,
   LifeBuoy,
+  LogOut,
   Menu,
   MessageSquare,
   Pill,
@@ -25,6 +26,8 @@ import {
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { Brand } from "@/components/brand";
+import { isSupabaseConfigured } from "@/lib/supabase/config";
+import { createClient } from "@/lib/supabase/client";
 
 type Role = "patient" | "doctor";
 
@@ -57,18 +60,36 @@ export function DashboardShell({
   role,
   name,
   subtitle,
+  demoMode = false,
   children,
 }: {
   role: Role;
   name: string;
   subtitle: string;
+  demoMode?: boolean;
   children: React.ReactNode;
 }) {
   const [open, setOpen] = useState(false);
+  const [signingOut, setSigningOut] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
   const nav = role === "patient" ? patientNav : doctorNav;
   const roleLabel = role === "patient" ? "Patient" : "Doctor";
-  const switchHref = role === "patient" ? "/doctor" : "/patient";
+  const switchHref =
+    isSupabaseConfigured && role === "patient" ? "/doctor-apply" : role === "patient" ? "/doctor" : "/patient";
+  const switchLabel =
+    isSupabaseConfigured && role === "patient" ? "Apply for doctor access" : `Switch to ${role === "patient" ? "doctor" : "patient"} view`;
+
+  async function signOut() {
+    setSigningOut(true);
+    try {
+      await createClient().auth.signOut();
+      router.replace("/login");
+      router.refresh();
+    } finally {
+      setSigningOut(false);
+    }
+  }
 
   return (
     <div className="min-h-screen bg-[#F7F9F8]">
@@ -162,12 +183,20 @@ export function DashboardShell({
             className="focus-ring mt-2 flex items-center gap-2 rounded-xl px-3 py-2.5 text-xs font-semibold text-muted hover:bg-slate-50 hover:text-ink"
           >
             <Stethoscope className="size-4" aria-hidden="true" />
-            Switch to {role === "patient" ? "doctor" : "patient"} view
+            {switchLabel}
           </Link>
         </div>
       </aside>
 
       <div className="lg:pl-72">
+        {demoMode && (
+          <div className="border-b border-amber-200 bg-amber-50 px-4 py-2.5 text-center text-[11px] font-medium text-amber-800 sm:px-6 lg:px-8">
+            Demo mode — Supabase authentication is not configured. Dashboards show synthetic data only.{" "}
+            <Link href="/login" className="font-bold underline underline-offset-2">
+              View setup
+            </Link>
+          </div>
+        )}
         <header className="sticky top-0 z-30 border-b border-slate-200/70 bg-[#F7F9F8]/90 backdrop-blur-xl">
           <div className="flex h-[72px] items-center gap-3 px-4 sm:px-6 lg:px-8">
             <button
@@ -191,6 +220,18 @@ export function DashboardShell({
               <span className="hidden rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-muted sm:inline-flex">
                 Demo data
               </span>
+              {isSupabaseConfigured && (
+                <button
+                  type="button"
+                  onClick={signOut}
+                  disabled={signingOut}
+                  className="focus-ring grid size-10 place-items-center rounded-xl border border-slate-200 bg-white text-slate-600 transition hover:text-rose-600 disabled:opacity-50"
+                  aria-label="Sign out"
+                  title="Sign out"
+                >
+                  <LogOut className="size-[18px]" />
+                </button>
+              )}
               <button
                 type="button"
                 className="focus-ring relative grid size-10 place-items-center rounded-xl border border-slate-200 bg-white text-slate-600 hover:text-ink"

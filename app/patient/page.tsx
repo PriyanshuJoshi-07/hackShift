@@ -15,6 +15,8 @@ import {
   Video,
 } from "lucide-react";
 import { DashboardShell } from "@/components/dashboard-shell";
+import { getSessionProfile } from "@/lib/supabase/profile";
+import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { Badge, Card, CardHeader, EmptyNote, StatCard } from "@/components/ui";
 
 const stats = [
@@ -36,9 +38,12 @@ const messages = [
   { name: "Dr. Arjun Mehta", preview: "Please continue the current plan until we meet on Thursday.", time: "Mon" },
 ];
 
-export default function PatientDashboard() {
+export default async function PatientDashboard() {
+  const profile = await getSessionProfile();
+  const name = profile?.full_name?.trim() || "Ananya Sharma";
+
   return (
-    <DashboardShell role="patient" name="Ananya Sharma" subtitle="Patient overview">
+    <DashboardShell role="patient" name={name} subtitle="Patient overview" demoMode={!isSupabaseConfigured}>
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {stats.map((stat) => (
           <StatCard key={stat.label} {...stat} />
