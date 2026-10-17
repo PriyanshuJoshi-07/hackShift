@@ -7,6 +7,8 @@ and Supabase Auth/PostgreSQL.
 
 - Responsive landing page with patient and doctor workspaces
 - Patient and doctor registration, sign-in, sign-out, and session refresh
+- Email confirmation callback, password reset, and single-use recovery links
+- Server- and middleware-level protected routes with role-aware access
 - Protected routes with role-aware access (patient / verified doctor)
 - Doctor applications reviewed by an admin; roles cannot be self-assigned
 - PostgreSQL row-level security for profiles and applications
@@ -33,7 +35,10 @@ authentication is disabled.
 3. Copy `.env.example` to `.env.local` and set:
    - `NEXT_PUBLIC_SUPABASE_URL`
    - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-4. Restart the dev server.
+4. In Supabase Authentication -> URL Configuration, set the Site URL to your app
+   origin and add `<origin>/auth/callback` to the redirect allow list. This enables
+   email confirmation and password recovery.
+5. Restart the dev server and rebuild for production with the same variables present.
 
 Use only the anon (public) key in the app. Never expose the service role key to the
 browser.

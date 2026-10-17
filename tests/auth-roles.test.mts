@@ -3,8 +3,10 @@ import assert from "node:assert/strict";
 import {
   canAccessDashboard,
   homeRouteFor,
+  isAuthPath,
   isDoctor,
   isProtectedPath,
+  safePostAuthPath,
   type SessionProfile,
 } from "../lib/auth/roles.ts";
 
@@ -34,6 +36,22 @@ test("patients cannot access doctor workspaces", () => {
 test("anonymous sessions are denied protected dashboards", () => {
   assert.equal(canAccessDashboard(null, "/patient"), false);
   assert.equal(canAccessDashboard(null, "/doctor"), false);
+});
+
+test("only the reset-password destination is accepted after auth", () => {
+  assert.equal(safePostAuthPath("/reset-password"), "/reset-password");
+  assert.equal(safePostAuthPath("https://evil.example"), null);
+  assert.equal(safePostAuthPath("//evil.example"), null);
+  assert.equal(safePostAuthPath("/doctor"), null);
+  assert.equal(safePostAuthPath(null), null);
+});
+
+test("auth pages are recognised for signed-in redirects", () => {
+  assert.equal(isAuthPath("/login"), true);
+  assert.equal(isAuthPath("/register"), true);
+  assert.equal(isAuthPath("/forgot-password"), true);
+  assert.equal(isAuthPath("/reset-password"), false);
+  assert.equal(isAuthPath("/patient"), false);
 });
 
 test("protected paths are identified consistently", () => {

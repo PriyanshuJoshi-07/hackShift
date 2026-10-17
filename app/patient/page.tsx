@@ -38,12 +38,29 @@ const messages = [
   { name: "Dr. Arjun Mehta", preview: "Please continue the current plan until we meet on Thursday.", time: "Mon" },
 ];
 
-export default async function PatientDashboard() {
+export default async function PatientDashboard({
+  searchParams,
+}: {
+  searchParams: Promise<{ notice?: string }>;
+}) {
   const profile = await getSessionProfile();
+  const { notice } = await searchParams;
   const name = profile?.full_name?.trim() || "Ananya Sharma";
 
   return (
     <DashboardShell role="patient" name={name} subtitle="Patient overview" demoMode={!isSupabaseConfigured}>
+      {notice === "doctor-approval" && (
+        <div className="mb-5 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3.5 sm:px-5">
+          <p className="text-xs font-bold text-amber-900">Doctor access is not active yet</p>
+          <p className="mt-1 text-[11px] leading-5 text-amber-800">
+            You are signed in with patient access. The doctor workspace becomes
+            available only after an administrator verifies your doctor application.
+          </p>
+          <Link href="/doctor-apply" className="mt-2 inline-block text-[11px] font-bold text-amber-900 underline underline-offset-2">
+            View verification status
+          </Link>
+        </div>
+      )}
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {stats.map((stat) => (
           <StatCard key={stat.label} {...stat} />

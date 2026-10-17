@@ -77,7 +77,15 @@ export function LoginForm({ configured }: { configured: boolean }) {
         />
       </Field>
 
-      <Field label="Password" htmlFor="password">
+      <Field
+        label="Password"
+        htmlFor="password"
+        action={
+          <Link href="/forgot-password" className="text-[11px] font-semibold text-teal-700 hover:text-teal-600">
+            Forgot password?
+          </Link>
+        }
+      >
         <div className="relative">
           <input
             id="password"
@@ -122,17 +130,22 @@ export function LoginForm({ configured }: { configured: boolean }) {
 function Field({
   label,
   htmlFor,
+  action,
   children,
 }: {
   label: string;
   htmlFor: string;
+  action?: React.ReactNode;
   children: React.ReactNode;
 }) {
   return (
     <div>
-      <label htmlFor={htmlFor} className="mb-1.5 block text-xs font-semibold text-ink">
-        {label}
-      </label>
+      <div className="mb-1.5 flex items-center justify-between gap-2">
+        <label htmlFor={htmlFor} className="block text-xs font-semibold text-ink">
+          {label}
+        </label>
+        {action}
+      </div>
       {children}
     </div>
   );

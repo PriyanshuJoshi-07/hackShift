@@ -23,6 +23,16 @@ export function canAccessDashboard(
   return true;
 }
 
+export const AUTH_PATHS = ["/login", "/register", "/forgot-password"] as const;
+
+export function isAuthPath(pathname: string): boolean {
+  return (AUTH_PATHS as readonly string[]).includes(pathname);
+}
+
+export function safePostAuthPath(next: string | null): string | null {
+  return next === "/reset-password" ? "/reset-password" : null;
+}
+
 export function isProtectedPath(pathname: string): boolean {
   return (
     pathname.startsWith("/patient") ||

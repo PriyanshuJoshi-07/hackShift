@@ -4,11 +4,10 @@ import { isSupabaseConfigured, supabaseConfig } from "@/lib/supabase/config";
 import {
   canAccessDashboard,
   homeRouteFor,
+  isAuthPath,
   isProtectedPath,
   type SessionProfile,
 } from "@/lib/auth/roles";
-
-const AUTH_PATHS = ["/login", "/register"];
 
 export async function middleware(request: NextRequest) {
   if (!isSupabaseConfigured) {
@@ -72,7 +71,7 @@ export async function middleware(request: NextRequest) {
     return response;
   }
 
-  if (AUTH_PATHS.includes(pathname)) {
+  if (isAuthPath(pathname)) {
     const homeUrl = request.nextUrl.clone();
     homeUrl.pathname = homeRouteFor(profile);
     homeUrl.search = "";
@@ -106,5 +105,6 @@ export const config = {
     "/doctor-apply",
     "/login",
     "/register",
+    "/forgot-password",
   ],
 };
